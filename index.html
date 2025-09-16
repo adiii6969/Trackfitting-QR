@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Railway Track Fittings QR Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(120deg, #667eea 0%, #764ba2 100%);
+            color: #222;
+        }
+        .hidden { display: none !important; }
+        .centered { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .login-card {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 12px 40px rgba(31,38,135,0.15);
+            padding: 2.5rem 2rem 2rem 2rem;
+            width: 100%;
+            max-width: 350px;
+        }
+        .login-title { text-align: center; font-size: 2rem; font-weight: 600; color: #667eea; }
+        .login-form label { font-weight: 500; margin-bottom: 5px; }
+        .login-form input {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1.2rem;
+            border-radius: 8px;
+            border: 1px solid #ccd;
+        }
+        .login-form button {
+            width: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+        .login-form button:hover { box-shadow: 0 4px 10px rgba(102,126,234,0.18); }
+        .error { text-align: center; color: #e74c3c; margin-bottom: 8px; font-size: 0.95rem; }
+        .demo-info { font-size: 0.9rem; background: #f3f5fa; border-radius: 8px; padding: 10px; margin-top: 10px; text-align: center;}
+        header {
+            background: rgba(255,255,255,0.10);
+            padding: 12px 0 0 0;
+            box-shadow: 0 4px 10px rgba(31,38,135,0.18);
+            backdrop-filter: blur(7px);
+        }
+        .nav {
+            max-width: 1200px;
+            margin: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+        .logo {
+            color: white;
+            font-size: 1.7rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .nav-links a:hover, .nav-links a.active { background: rgba(255,255,255,0.21);}
+        .user-info {
+            color: white;
+            font-size: 0.97rem;
+            margin-left: 14px;
+        }
+        .logout-btn {
+            background: rgba(231,76,60,0.88);
+            color: white;
+            border: none;
+            font-size: 0.93rem;
+            padding: 7px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 12px;
+        }
+        .logout-btn:hover { background: rgba(231,76,60,1);}
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        .section { display: none; }
+        .section.active { display: block; }
+        .card {
+            background: rgba(255,255,255,0.97);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(31,38,135,0.21);
+            border: 1px solid rgba(255,255,255,0.13);
+            margin-bottom: 2rem;
+        }
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .metric-card {
+            background: white;
+            padding: 1.3rem 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        .metric-number { font-size: 2rem; font-weight: bold; color: #667eea;}
+        .metric-label { color: #666; margin-top: 0.5rem;}
+        .part-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: #f4f7fc;
+            transition: box-shadow 0.2s;
+        }
+        .part-card:hover {
+            box-shadow: 0 4px 12px rgba(102,126,234,0.13);
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.45rem;
+        }
+        .status-active { background-color: #00b894; }
+        .status-maintenance { background-color: #fdcb6e; }
+        .status-defective { background-color: #e17055; }
+        .scanner-area {
+            border: 3px dashed #667eea;
+            border-radius: 8px;
+            padding: 2.5rem;
+            text-align: center;
+            background: rgba(102,126,234,0.07);
+            margin-bottom: 2rem;
+        }
+        .btn {
+            background: linear-gradient(45deg,#667eea,#764ba2);
+            color: white;
+            padding: 0.69rem 2rem;
+            border-radius: 7px;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            margin-right: 8px;
+            margin-bottom: 12px;
+        }
+        .btn-secondary { background: linear-gradient(45deg,#ffeaa7,#fab1a0);}
+        .btn-danger { background: linear-gradient(45deg,#e17055,#d63031);}
+        .search-box {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.03rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .form-group { margin-bottom: 1.5rem;}
+        .form-group label { font-weight: 500; display: block; margin-bottom: 5px;}
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.7rem;
+            border-radius: 7px;
+            border: 2px solid #ddd;
+            margin-bottom: 11px;
+            font-size: 1rem;
+            background: #f3f4fa;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus{
+            outline: none;
+            border-color: #667eea;
+        }
+        @media (max-width: 768px) {
+            .nav { flex-direction: column; gap: 1rem;}
+            .nav-links { flex-wrap: wrap; justify-content: center;}
+            .container { padding: 0 1rem;}
+            .analytics-grid { grid-template-columns: 1fr;}
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="loginPage" class="centered">
+        <div class="login-card">
+            <div class="login-title">🚂 Railway QR System</div>
+            <form id="loginForm" class="login-form">
+                <label for="username">Username:</label>
+                <input type="text" id="username" required>
+                <label for="password">Password:</label>
+                <input type="password" id="password" required>
+                <button type="submit">Login</button>
+                <div id="errorMsg" class="error hidden">Invalid login! Try again.</div>
+            </form>
+            <div class="demo-info">
+                <b>Demo Users:</b> <br>
+                admin / admin123 <br>
+                inspector / inspect123 <br>
+                operator / operate123
+            </div>
+        </div>
+    </div>
+    <!-- Main App Dashboard -->
+    <div id="mainApp" class="hidden">
+        <header>
+            <nav class="nav">
+                <div class="logo">🚂 Railway QR System</div>
+                <div class="nav-links">
+                    <a href="#" onclick="showSection('dashboard', event)" class="nav-link active">Dashboard</a>
+                    <a href="#" onclick="showSection('add-part', event)" class="nav-link">Add Part</a>
+                    <a href="#" onclick="showSection('scan', event)" class="nav-link">Scan QR</a>
+                    <a href="#" onclick="showSection('inventory', event)" class="nav-link">Inventory</a>
+                    <a href="#" onclick="showSection('analytics', event)" class="nav-link">Analytics</a>
+                    <span class="user-info" id="loggedInUser">Welcome, User</span>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </nav>
+        </header>
+        <div class="container">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section active">
+                <div class="card">
+                    <h2>Railway Track Fittings Management Dashboard</h2>
+                    <p>Welcome to the AI-based QR Code tracking system for Indian Railways track fittings.</p>
+                    <div class="analytics-grid">
+                        <div class="metric-card">
+                            <div class="metric-number" id="totalParts">0</div>
+                            <div class="metric-label">Total Parts</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-number" id="activeParts">0</div>
+                            <div class="metric-label">Active Parts</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-number" id="maintenanceParts">0</div>
+                            <div class="metric-label">Maintenance Required</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-number" id="defectiveParts">0</div>
+                            <div class="metric-label">Defective Parts</div>
+                        </div>
+                    </div>
+                    <h3>Recent Activities</h3>
+                    <div id="recentActivities"></div>
+                </div>
+            </div>
+            <!-- Add Part Section -->
+            <div id="add-part" class="section">
+                <div class="card">
+                    <h2>Add New Track Fitting</h2>
+                    <form id="addPartForm">
+                        <div class="grid">
+                            <div>
+                                <div class="form-group">
+                                    <label for="partName">Part Name</label>
+                                    <input type="text" id="partName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="partType">Part Type</label>
+                                    <select id="partType" required>
+                                        <option value="">Select Part Type</option>
+                                        <option value="rail">Rail</option>
+                                        <option value="sleeper">Sleeper</option>
+                                        <option value="fastener">Fastener</option>
+                                        <option value="clip">Clip</option>
+                                        <option value="plate">Plate</option>
+                                        <option value="bolt">Bolt</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="vendorName">Vendor Name</label>
+                                    <input type="text" id="vendorName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="vendorId">Vendor ID</label>
+                                    <input type="text" id="vendorId" required>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="form-group">
+                                    <label for="lotNumber">Lot Number</label>
+                                    <input type="text" id="lotNumber" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="manufactureDate">Manufacture Date</label>
+                                    <input type="date" id="manufactureDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="supplyDate">Supply Date</label>
+                                    <input type="date" id="supplyDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="warrantyPeriod">Warranty Period (months)</label>
+                                    <input type="number" id="warrantyPeriod" min="1" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="location">Installation Location</label>
+                            <input type="text" id="location" placeholder="e.g., Section A, Track 1, KM 123">
+                        </div>
+                        <div class="form-group">
+                            <label for="specifications">Technical Specifications</label>
+                            <textarea id="specifications" rows="3" placeholder="Enter technical specifications..."></textarea>
+                        </div>
+                        <button type="submit" class="btn">Generate QR Code & Add Part</button>
+                    </form>
+                    <div id="generatedQR" style="display: none;">
+                        <h3>Generated QR Code</h3>
+                        <div class="qr-code">
+                            <div id="qrCodeDisplay"></div>
+                            <p>Part ID: <strong id="generatedPartId"></strong></p>
+                            <button onclick="downloadQR()" class="btn btn-secondary">Download QR Code</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Scan QR Section -->
+            <div id="scan" class="section">
+                <div class="card">
+                    <h2>Scan QR Code</h2>
+                    <div class="scanner-area">
+                        <h3>📱 QR Code Scanner</h3>
+                        <p>Use your device camera to scan QR codes or enter the Part ID manually</p>
+                        <input type="text" id="manualPartId" placeholder="Enter Part ID manually" class="search-box">
+                        <button onclick="lookupPart()" class="btn">Lookup Part</button>
+                    </div>
+                    <div id="scannedPartInfo" style="display: none;">
+                        <h3>Part Information</h3>
+                        <div id="partDetails"></div>
+                        <button onclick="updateMaintenanceRecord()" class="btn">Update Maintenance Record</button>
+                        <button onclick="reportIssue()" class="btn btn-danger">Report Issue</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Inventory Section -->
+            <div id="inventory" class="section">
+                <div class="card">
+                    <h2>Parts Inventory</h2>
+                    <input type="text" id="searchInventory" placeholder="Search parts..." class="search-box" onkeyup="filterInventory()">
+                    <div class="form-group">
+                        <label for="filterStatus">Filter by Status</label>
+                        <select id="filterStatus" onchange="filterInventory()">
+                            <option value="">All Statuses</option>
+                            <option value="active">Active</option>
+                            <option value="maintenance">Maintenance Required</option>
+                            <option value="defective">Defective</option>
+                        </select>
+                    </div>
+                    <div id="inventoryList"></div>
+                </div>
+            </div>
+            <!-- Analytics Section -->
+            <div id="analytics" class="section">
+                <div class="card">
+                    <h2>AI Analytics & Insights</h2>
+                    <div class="analytics-grid">
+                        <div class="metric-card">
+                            <div class="metric-number">94%</div>
+                            <div class="metric-label">System Reliability</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-number">67</div>
+                            <div class="metric-label">Avg. Part Life (months)</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-number">12</div>
+                            <div class="metric-label">Predictive Alerts</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-number">₹2.3L</div>
+                            <div class="metric-label">Cost Savings</div>
+                        </div>
+                    </div>
+                    <h3>Vendor Performance Analysis</h3>
+                    <div id="vendorAnalysis"></div>
+                    <h3>Maintenance Predictions</h3>
+                    <div id="maintenancePredictions"></div>
+                    <h3>Defect Pattern Analysis</h3>
+                    <div id="defectAnalysis"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Demo users
+        const users = {
+            'admin': { password: 'admin123', role: 'Administrator' },
+            'inspector': { password: 'inspect123', role: 'Inspector' },
+            'operator': { password: 'operate123', role: 'Operator' }
+        };
+        let currentUser = null;
+        let partsDatabase = [];
+        let maintenanceRecords = [];
+        let currentPartId = null;
+
+        // Login handling
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+            if (users[username] && users[username].password === password) {
+                currentUser = { username, role: users[username].role };
+                // Hide login, show app
+                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                document.getElementById('loggedInUser').textContent = `Welcome, ${currentUser.role} (${currentUser.username})`;
+                // Initialize data
+                loadSampleData();
+                updateDashboard();
+                updateInventory();
+                showSection('dashboard');
+            } else {
+                document.getElementById('errorMsg').classList.remove('hidden');
+            }
+        });
+
+        // Logout function
+        function logout() {
+            currentUser = null;
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('errorMsg').classList.add('hidden');
+            partsDatabase = [];
+            maintenanceRecords = [];
+        }
+
+        // Navigation
+        function showSection(sectionId, event=null) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(sec => sec.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            // Highlight nav
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => link.classList.remove('active'));
+            if (event && event.target) event.target.classList.add('active');
+        }
+
+        // Part ID utility
+        function generatePartId() {
+            const timestamp = Date.now().toString(36);
+            const random = Math.random().toString(36).substr(2, 5);
+            return `RF-${timestamp}-${random}`.toUpperCase();
+        }
+
+        // QR utility
+        function generateQRCode(data) {
+            return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data)}`;
+        }
+
+        // Add Part Form
+        document.getElementById('addPartForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const partData = {
+                id: generatePartId(),
+                name: document.getElementById('partName').value,
+                type: document.getElementById('partType').value,
+                vendorName: document.getElementById('vendorName').value,
+                vendorId: document.getElementById('vendorId').value,
+                lotNumber: document.getElementById('lotNumber').value,
+                manufactureDate: document.getElementById('manufactureDate').value,
+                supplyDate: document.getElementById('supplyDate').value,
+                warrantyPeriod: parseInt(document.getElementById('warrantyPeriod').value),
+                location: document.getElementById('location').value,
+                specifications: document.getElementById('specifications').value,
+                status: 'active',
+                createdDate: new Date().toISOString(),
+                lastScanned: null,
+                maintenanceHistory: []
+            };
+            partsDatabase.push(partData);
+            // QR
+            const qrUrl = generateQRCode(partData.id);
+            document.getElementById('qrCodeDisplay').innerHTML = `<img src="${qrUrl}" alt="QR Code for ${partData.id}">`;
+            document.getElementById('generatedPartId').textContent = partData.id;
+            document.getElementById('generatedQR').style.display = 'block';
+            this.reset();
+            updateDashboard();
+            updateInventory();
+            alert('Part added successfully! QR generated.');
+        });
+
+        // Lookup Part
+        function lookupPart() {
+            const partId = document.getElementById('manualPartId').value.trim();
+            if (!partId) { alert('Please enter a Part ID'); return; }
+            const part = partsDatabase.find(p => p.id === partId);
+            if (part) {
+                displayPartInfo(part);
+                part.lastScanned = new Date().toISOString();
+                updateDashboard();
+            } else {
+                alert('Part not found');
+            }
+        }
+
+        // Part info
+        function displayPartInfo(part) {
+            const statusColor = part.status === 'active' ? 'status-active' : 
+                               part.status === 'maintenance' ? 'status-maintenance' : 'status-defective';
+            const warrantyExpiry = new Date(part.supplyDate);
+            warrantyExpiry.setMonth(warrantyExpiry.getMonth() + part.warrantyPeriod);
+            const isUnderWarranty = new Date() < warrantyExpiry;
+            document.getElementById('partDetails').innerHTML = `
+                <div class="part-card">
+                    <h4>${part.name}</h4>
+                    <p><strong>Part ID:</strong> ${part.id}</p>
+                    <p><strong>Type:</strong> ${part.type}</p>
+                    <p><strong>Status:</strong> <span class="status-indicator ${statusColor}"></span>${part.status}</p>
+                    <p><strong>Vendor:</strong> ${part.vendorName} (${part.vendorId})</p>
+                    <p><strong>Lot Number:</strong> ${part.lotNumber}</p>
+                    <p><strong>Manufacture Date:</strong> ${new Date(part.manufactureDate).toLocaleDateString()}</p>
+                    <p><strong>Supply Date:</strong> ${new Date(part.supplyDate).toLocaleDateString()}</p>
+                    <p><strong>Warranty:</strong> ${isUnderWarranty ? 'Valid' : 'Expired'} (${part.warrantyPeriod} months)</p>
+                    <p><strong>Location:</strong> ${part.location || 'Not specified'}</p>
+                    <p><strong>Last Scanned:</strong> ${part.lastScanned ? new Date(part.lastScanned).toLocaleString() : 'Never'}</p>
+                    ${part.specifications ? `<p><strong>Specifications:</strong> ${part.specifications}</p>` : ''}
+                </div>
+            `;
+            document.getElementById('scannedPartInfo').style.display = 'block';
+            currentPartId = part.id;
+        }
+
+        // Maintenance record
+        function updateMaintenanceRecord() {
+            if (!currentPartId) return;
+            const maintenanceType = prompt('Enter maintenance type (Inspection/Repair/Replacement):');
+            if (maintenanceType) {
+                const record = {
+                    partId: currentPartId,
+                    type: maintenanceType,
+                    date: new Date().toISOString(),
+                    technician: prompt('Technician name:') || 'Unknown',
+                    notes: prompt('Additional notes:') || ''
+                };
+                maintenanceRecords.push(record);
+                const part = partsDatabase.find(p => p.id === currentPartId);
+                if (part) {
+                    part.maintenanceHistory.push(record);
+                    if (maintenanceType.toLowerCase().includes('repair')) {
+                        part.status = 'maintenance';
+                    }
+                }
+                alert('Maintenance record updated!');
+                updateDashboard();
+                updateInventory();
+            }
+        }
+
+        // Report issue
+        function reportIssue() {
+            if (!currentPartId) return;
+            const issueDescription = prompt('Describe the issue:');
+            if (issueDescription) {
+                const part = partsDatabase.find(p => p.id === currentPartId);
+                if (part) {
+                    part.status = 'defective';
+                    part.maintenanceHistory.push({
+                        partId: currentPartId,
+                        type: 'Issue Reported',
+                        date: new Date().toISOString(),
+                        technician: prompt('Reporter name:') || 'Unknown',
+                        notes: issueDescription
+                    });
+                }
+                alert('Issue reported!');
+                updateDashboard();
+                updateInventory();
+            }
+        }
+
+        // Dashboard metrics and recent activities
+        function updateDashboard() {
+            document.getElementById('totalParts').textContent = partsDatabase.length;
+            document.getElementById('activeParts').textContent = partsDatabase.filter(p => p.status === 'active').length;
+            document.getElementById('maintenanceParts').textContent = partsDatabase.filter(p => p.status === 'maintenance').length;
+            document.getElementById('defectiveParts').textContent = partsDatabase.filter(p => p.status === 'defective').length;
+            const recentActivities = partsDatabase.filter(p => p.lastScanned)
+                .sort((a, b) => new Date(b.lastScanned) - new Date(a.lastScanned)).slice(0, 5);
+            const activitiesHtml = recentActivities.map(part => `
+                <div class="part-card">
+                    <p><strong>${part.name}</strong> (${part.id}) was scanned</p>
+                    <small>${new Date(part.lastScanned).toLocaleString()}</small>
+                </div>
+            `).join('');
+            document.getElementById('recentActivities').innerHTML = activitiesHtml || '<p>No recent activities</p>';
+        }
+
+        // Inventory
+        function updateInventory() {
+            displayInventoryList(partsDatabase);
+        }
+        function displayInventoryList(parts) {
+            const inventoryHtml = parts.map(part => {
+                const statusColor = part.status === 'active' ? 'status-active' : 
+                                   part.status === 'maintenance' ? 'status-maintenance' : 'status-defective';
+                return `
+                    <div class="part-card">
+                        <h4>${part.name}</h4>
+                        <p><strong>ID:</strong> ${part.id}</p>
+                        <p><strong>Type:</strong> ${part.type}</p>
+                        <p><strong>Status:</strong> <span class="status-indicator ${statusColor}"></span>${part.status}</p>
+                        <p><strong>Vendor:</strong> ${part.vendorName}</p>
+                        <p><strong>Location:</strong> ${part.location || 'Not specified'}</p>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('inventoryList').innerHTML = inventoryHtml || '<p>No parts in inventory</p>';
+        }
+        function filterInventory() {
+            const searchTerm = document.getElementById('searchInventory').value.toLowerCase();
+            const statusFilter = document.getElementById('filterStatus').value;
+            let filteredParts = partsDatabase.filter(part => {
+                const matchesSearch = part.name.toLowerCase().includes(searchTerm) ||
+                                     part.id.toLowerCase().includes(searchTerm) ||
+                                     part.vendorName.toLowerCase().includes(searchTerm);
+                const matchesStatus = !statusFilter || part.status === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+            displayInventoryList(filteredParts);
+        }
+
+        // QR Download
+        function downloadQR() {
+            const qrImg = document.querySelector('#qrCodeDisplay img');
+            if (qrImg) {
+                const link = document.createElement('a');
+                link.download = `QR_${document.getElementById('generatedPartId').textContent}.png`;
+                link.href = qrImg.src;
+                link.click();
+            }
+        }
+
+        // Demo sample data
+        function loadSampleData() {
+            if (partsDatabase.length > 0) return; // Avoid reload on re-login
+            const sampleParts = [
+                {
+                    id: 'RF-SAMPLE-001',
+                    name: 'Standard Rail Section',
+                    type: 'rail',
+                    vendorName: 'Steel India Ltd',
+                    vendorId: 'SIL-2024',
+                    lotNumber: 'LOT-001',
+                    manufactureDate: '2024-01-15',
+                    supplyDate: '2024-02-01',
+                    warrantyPeriod: 60,
+                    location: 'Section A, Track 1, KM 123',
+                    specifications: 'UIC 60 Rail, 60 kg/m',
+                    status: 'active',
+                    createdDate: '2024-02-01T10:00:00Z',
+                    lastScanned: '2024-09-10T14:30:00Z',
+                    maintenanceHistory: []
+                },
+                {
+                    id: 'RF-SAMPLE-002',
+                    name: 'Concrete Sleeper',
+                    type: 'sleeper',
+                    vendorName: 'ConCrete Works',
+                    vendorId: 'CCW-2024',
+                    lotNumber: 'LOT-002',
+                    manufactureDate: '2024-03-10',
+                    supplyDate: '2024-03-20',
+                    warrantyPeriod: 36,
+                    location: 'Section B, Track 2, KM 145',
+                    specifications: 'PSC Sleeper, 2.6m length',
+                    status: 'maintenance',
+                    createdDate: '2024-03-20T09:00:00Z',
+                    lastScanned: '2024-09-15T11:15:00Z',
+                    maintenanceHistory: []
+                }
+            ];
+            partsDatabase.push(...sampleParts);
+        }
+    </script>
+</body>
+</html>
